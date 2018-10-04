@@ -1,0 +1,49 @@
+sudo: false
+
+language: node
+node_js:
+  - "node"
+
+addons:
+  apt:
+    update: true
+
+# Cache yarn
+cache:
+  yarn: true
+
+before_install:
+  # Install wine
+  - sudo apt-get install -y wine
+
+  # Install NodeJS
+  - nvm install node
+  - npm install -g yarn
+
+install:
+  # Download Yarn assets using lockfile
+  - yarn install --frozen-lockfile
+
+script:
+  # Lint Javascript
+  - git ls-files | grep -e '.js$' | xargs node_modules/.bin/eslint
+
+  # Make zipfile
+  - make default -B
+
+  # Copy release files
+  - mv "$( git rev-parse --show-toplevel 2>/dev/null)"/dist/*.zip "$( git rev-parse --show-toplevel 2>/dev/null)"
+
+matrix:
+  fast_finish: true
+
+deploy:
+  provider: releases
+  api_key:
+    secure: OLJXPBOPIffi0nr+md8WePZB0BCmlQ6+AE8mIdDmvG4f62JpgyEPW/VVThMN+53jEGGP8FZUKDtAP+6Rb4WUNtF8NNYb6vD0fcNofoNIEkyfBSQgcYid/30OTjog3XoOjo6JMGuweQq5GRcJ6woPaKD6YyipYA/LWSkcZJcrCrWeCzP1LxDOwvjJwzHP3PGbFAzPoqaGoBQ42CmMOuDXOraRQjtv2DMWztMqaDK2sM10PzdvIyrip2dSh1J2JkttkvCrFFUwKPrXm7WZs/JIzdQD/txYQLOx6gcEpAnzD3UIjQpZQzrPCozhlgycVB/6YKz8dKNZTptFZY6TkvkBYDbhUWbq8OVUa2FFjGAF5OeZw5MJjvtkc4NRHNW4jnc4w2h4+BuGq56EneNMzK34PKe7b5QBnCFOmGfJsXxcOXavsTdn7jN+Xu/w2DwHqaWXMGaT5XrwGotj0f705BeV/jpetGpLtqXcWKJRU85UU7pfV4D+aaH5UwDl5WbtoY67S6M/ITlfay1NCf51R4UzzoRH6NkS4cL2cgPO7EftvaWArBq29GrOVlSF9c4nL7qfyTBL2xbEQ558tzvtlAUGavam+UXz7O5PPhk+0PCKoOKPlqLAl68uDFtGAt2dnca324yWckUXqtuV8L96EYktlTScFNB0Hr0YCgdsUg1cYng=
+  file:
+    - "doot-doot-linux-x64.zip"
+    - "doot-doot-win32-x64.zip"
+  skip_cleanup: true
+  on:
+    tags: true
