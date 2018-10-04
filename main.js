@@ -1,72 +1,48 @@
 
 // Import stuff
-const { app, Menu, Tray, nativeImage } = require('electron')
-const player = require('play-sound')()
+const { app, Menu, Tray, NativeImage } = require('electron')
+const Doot = require('./src/doot')
 
-// Define variables and cnstants
-let iconPath = process.platform === 'win32' ? 'assets/doot.ico' : 'assets/doot.png'
-const icon = nativeImage.createFromPath(iconPath)
-const sound = 'assets/doot.m4a'
+// Load Mr. Skeletor
+const skeletor = new Doot()
 
-// Define tracking, for garbage collection
+// Define system tray handle
 let tray = null
-let audio = null
-let nextDoot = null
 
-const doDoot = () => {
-  // Abort if player is gone
-  if (!player) {
-    return
+/**
+ * This method will be called when Electron has finished initialization and is
+ * ready to create browser windows.  Some APIs can only be used after this event
+ * occurs.
+ */
+app.on('ready', () => {
+  let trayIconName = process.platform === 'win32' ? 'doot.ico' : 'doot.png'
+  let trayIconPath = `${__dirname}/assets/${trayIconName}`
+  let trayIcon
+  try {
+    trayIcon = NativeImage.createFromPath(trayIconPath)
+    tray = new Tray(trayIcon)
+    tray.setContextMenu(Menu.buildFromTemplate([
+      {
+        label: 'Doot',
+        click: () => skeletor.doot()
+      },
+      {
+        role: 'quit',
+        label: 'Exit application'
+      }
+    ]))
+  } catch (err) {
+    // Ignore
   }
-
-  // Play the audio
-  audio = player.play(sound, err => {
-    if (err) {
-      throw err
-    }
-  })
-
-  // Show a balloon
-  if (tray && !tray.isDestroyed()) {
-    tray.displayBalloon({
-      title: 'Spook',
-      content: 'You have been spooked'
-    })
-  }
-
-  // Wait a while
-  nextDoot = setTimeout(doDoot, (Math.random() * 600 + 600) * 1000);
-}
-
-// Create icon
-const registerTrayIcon = () => {
-  tray = new Tray(icon)
-  const contextMenu = Menu.buildFromTemplate([{
-    role: 'quit',
-    label: 'Exit application',
-    sublabel: 'Stop the spooking'
-  }])
-  tray.setToolTip('Doot doot.')
-  tray.setContextMenu(contextMenu)
 
   // Start off with a doot
-  doDoot()
-}
+  skeletor.start()
+})
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on('ready', registerTrayIcon)
-
-// Unbind audio listener on exit
+/**
+ * Remove tray icon and stop spooping the user on exit
+ */
 app.on('will-quit', () => {
-  if (audio) {
-    audio.kill()
-  }
-  if (nextDoot) {
-    clearTimeout(nextDoot)
-  }
-  if (tray) {
-    tray.destroy()
-  }
+  skeletor && skeletor.stop()
+  tray && tray.destroy()
 })

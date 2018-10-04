@@ -13,32 +13,49 @@ const shared = {
   executableName: 'doot',
   appCopyright: 'Mozilla Public License Version 2.0',
   dir: path.dirname(require.main.filename),
-  asar: true,
-  ignore: '/build.js',
+  asar: false, // DO NOT BUNDLE, the binaries will break!
+  ignore: [
+    '/build.js',
+    /lib\/cmdmp3\/(cmdmp3.+|readme.txt)$/,
+    '/Makefile',
+    '/yarn.lock'
+  ],
   out: 'dist/',
   overwrite: true
 }
 
-const platforms = [
-  {
+const platforms = {
+  win32: {
     platform: 'win32',
     win32metadata: {
-      CompanyName: "Roelof's Horrible Productions",
-      'requested-execution-level': 'user'
+      CompanyName: "Roelof's Horrible Productions"
     },
-    icon: 'assets/doot.ico'
+    icon: 'assets/doot-large.ico'
   },
-  {
+  linux: {
     platform: 'linux'
   }
-]
+}
 
-Array.prototype.forEach.call(platforms, opts => {
+let actionList = []
+let platform = process.argv.length > 2 ? process.argv[2] : null
+
+if (platform === 'all') {
+  Array.prototype.forEach.apply(platforms, config => actionList.push(config))
+} else if (platforms.hasOwnProperty(platform)) {
+  actionList.push(platforms[platform])
+} else {
+  throw Error(`Cannot find platform config for [${platform}]!`)
+}
+
+Array.prototype.forEach.call(actionList, opts => {
+  let platform = opts.platform
+
   packager({
     ...shared,
     ...opts
-  }).then((paths) => {
-    console.log('Built files')
+  }).then(paths => {
+    console.log(`Built files for ${platform}`)
     paths.forEach(path => {
       console.log(`- ${path}`)
     })
