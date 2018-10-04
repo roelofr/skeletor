@@ -1,6 +1,7 @@
 
 // Import stuff
 const { app, Menu, Tray, NativeImage } = require('electron')
+const path = require('path')
 const Doot = require('./src/doot')
 
 // Load Mr. Skeletor
@@ -15,8 +16,7 @@ let tray = null
  * occurs.
  */
 app.on('ready', () => {
-  let trayIconName = process.platform === 'win32' ? 'doot.ico' : 'doot.png'
-  let trayIconPath = `${__dirname}/assets/${trayIconName}`
+  let trayIconPath = path.normalize(`${__dirname}/assets/doot-x32.png`)
   let trayIcon
   try {
     trayIcon = NativeImage.createFromPath(trayIconPath)
@@ -34,6 +34,9 @@ app.on('ready', () => {
   } catch (err) {
     // Ignore
   }
+
+  // Tell Mr Skeletor we're ready
+  skeletor.ready()
 
   // Start off with a doot
   skeletor.start()

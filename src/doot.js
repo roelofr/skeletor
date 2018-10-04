@@ -5,6 +5,7 @@
  * @license MPL-2.0
  */
 
+const { Notification, nativeImage } = require('electron')
 const path = require('path')
 const playerFunction = require('play-sound')
 
@@ -15,7 +16,9 @@ const playerOptions = {
 }
 
 // Get audio path
-const audioFile = path.dirname(__dirname) + '/assets/doot.mp3'
+const audioFile = path.normalize(`${__dirname}/../assets/doot.mp3`)
+const notifyIconPath = path.normalize(`${__dirname}/../assets/doot-64.png`)
+const notifyIcon = nativeImage.createFromPath(notifyIconPath)
 
 class Doot {
   /**
@@ -31,6 +34,25 @@ class Doot {
   constructor () {
     this.player = playerFunction(playerOptions)
     this.timeout = null
+    this.notification = null
+  }
+
+  ready () {
+    // Create notification
+    if (Notification.isSupported()) {
+      this.notification = new Notification({
+        title: 'Doot doot',
+        body: 'You have been spooked my Mr. Skeletor',
+        silent: true,
+        icon: notifyIcon
+      }).on('click', event => {
+        this.notification.close()
+        event.preventDefault()
+      })
+      console.log('Created notification')
+    } else {
+      console.log('Notifications not supported')
+    }
   }
 
   /**
@@ -45,6 +67,15 @@ class Doot {
           console.log('User has been spooked!')
         }
       })
+    }
+
+    if (this.notification) {
+      try {
+        this.notification.show()
+      } catch (err) {
+        // Unset notification
+        this.notification = null
+      }
     }
   }
 
