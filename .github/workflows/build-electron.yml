@@ -1,0 +1,26 @@
+name: "Build Electron"
+
+on: [push]
+
+jobs:
+  lint:
+    name: "Lint code"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install Electron code
+        run: yarn install --cwd=electron/ --frozen-lockfile
+      - name: Lint code
+        run: yarn run test
+  compile:
+    name: "Compile Electron app"
+    runs-on: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v1
+      - name: Make application
+        run: make electron
+      - name: Publish application
+        uses: actions/upload-artifact@master
+        with:
+          name: compiled-${{ job.container.image }}-${{ GITHUB_SHA }}
+          path: dist/
