@@ -13,6 +13,9 @@ electron:
 	$(info Build for this platform)
 	$(MAKE) -C ./electron build
 
+	$(info Bundle for this platform)
+	$(MAKE) -C ./electron bundle
+
 	$(info Copy built zipfiles)
 	cp ./electron/dist/*.zip dist/
 

@@ -9,18 +9,33 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Install Electron code
-        run: yarn install --cwd=electron/ --frozen-lockfile
+        run: yarn --cwd=electron/ install --frozen-lockfile
       - name: Lint code
-        run: yarn run test
+        run: yarn --cwd=electron/ test
   compile:
     name: "Compile Electron app"
-    runs-on: [ubuntu-latest, windows-latest]
+    needs: [lint]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
     steps:
       - uses: actions/checkout@v1
-      - name: Make application
+      - name: Install dependencies
+        run: make --dir=electron/ install
+      - name: Compile dependencies
+        if: success() && matrix.os == 'windows-latest'
+        run: |
+          git submodule update --init
+          make --dir=electron/ bin/cmdmp3.exe
+      - name: Build application
+        run: make --dir=electron/ build
+      - name: Bundle application
+        run: make --dir=electron/ bundle
+      - name: Validate and pre-publish application
         run: make electron
       - name: Publish application
         uses: actions/upload-artifact@master
         with:
-          name: compiled-${{ job.container.image }}-${{ GITHUB_SHA }}
+          name: compiled-${{ matrix.os }}
           path: dist/

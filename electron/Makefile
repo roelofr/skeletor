@@ -27,7 +27,8 @@ bin/cmdmp3.exe: lib/cmdmp3/cmdmp3.exe
 # Add assets symlink
 assets: ../assets
 ifeq ($(OS), Windows_NT)
-	mklink /d /j assets ../assets
+	mkdir assets
+	cp ../assets/* assets
 else
 	test -h assets || ln -s ../assets assets
 endif
@@ -36,9 +37,18 @@ endif
 .PHONY: build
 build:
 ifeq ($(OS), Windows_NT)
-	$(MAKE) dist/doot-doot-win32-x64/doot
+	$(MAKE) dist/doot-doot-win32-x64/doot.exe
 else
 	$(MAKE) dist/doot-doot-linux-x64/doot
+endif
+
+# Bundle platform-dependent
+.PHONY: bundle
+bundle: build
+ifeq ($(OS), Windows_NT)
+	$(MAKE) dist/doot-doot-win32-x64.zip
+else
+	$(MAKE) dist/doot-doot-linux-x64.zip
 endif
 
 # Build linux bundle
