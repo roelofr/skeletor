@@ -1,0 +1,4 @@
+[submodule "lib/cmdmp3"]
+	path = lib/cmdmp3
+	url = git@github.com:jimlawless/cmdmp3.git
+    ignore = dirty
