@@ -30,7 +30,7 @@ const platforms = {
     win32metadata: {
       CompanyName: "Roelof's Horrible Productions"
     },
-    icon: 'assets/doot-large.ico'
+    icon: 'assets-win/doot-large.ico'
   },
   linux: {
     platform: 'linux'
