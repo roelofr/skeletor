@@ -4,6 +4,7 @@
   "description": "Doots your friends during October",
   "main": "main.js",
   "scripts": {
+    "test": "eslint *.js src/**/*.js",
     "start": "electron .",
     "build": "npm run build-linx && npm run build-windows",
     "build-linux": "node ./build.js linux",
