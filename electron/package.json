@@ -15,7 +15,7 @@
     "play-sound": "^1.1.2"
   },
   "devDependencies": {
-    "electron": "^3.0.0",
+    "electron": "^7.2.4",
     "electron-packager": "^12.2.0",
     "eslint": "^4.19.1",
     "eslint-config-standard": "^11.0.0",
